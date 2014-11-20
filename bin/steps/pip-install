@@ -1,13 +1,6 @@
-[ ! "$FRESH_PYTHON" ] && bpwatch start pip_install
-[ "$FRESH_PYTHON" ] && bpwatch start pip_install_first
+#!/usr/bin/env bash
 
-# if user wants to uninstall some packages first do so
-set +e
-if [[ -f requirements-uninstall.txt ]]; then
-  puts-cmd "pip uninstall -y -r requirements-uninstall.txt"
-  /app/.heroku/python/bin/pip uninstall -y -r requirements-uninstall.txt --disable-pip-version-check
-  PIP_STATUS="${PIPESTATUS[0]}"
-fi
+source $BIN_DIR/utils
 
 # change variables in all requirements files depending on wether pypiapp is set for the particular deployment
 if [[ -z $PYPIAPP ]]; then
