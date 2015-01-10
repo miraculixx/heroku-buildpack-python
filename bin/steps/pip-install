@@ -7,16 +7,19 @@ if [[ -f requirements-uninstall.txt ]]; then
   pip uninstall -y -r requirements-uninstall.txt
 fi
 
-set +e
-/app/.heroku/python/bin/pip install -r requirements.txt --exists-action=w --src=./.heroku/src --disable-pip-version-check --no-cache-dir 2>&1 | tee $WARNINGS_LOG | cleanup | indent
-PIP_STATUS="${PIPESTATUS[0]}"
-set -e
-
 show-warnings
 
 if [[ ! $PIP_STATUS -eq 0 ]]; then
     exit 1
 fi
+
+# change variables in all requirements files
+sed -i "s/\$APP/$APP/" requirements*
+ 
+set +e
+/app/.heroku/python/bin/pip install -r requirements.txt --exists-action=w --src=./.heroku/src --disable-pip-version-check --no-cache-dir 2>&1 | tee $WARNINGS_LOG | cleanup | indent
+PIP_STATUS="${PIPESTATUS[0]}"
+set -e
 
 # Smart Requirements handling
 cp requirements.txt .heroku/python/requirements-declared.txt
@@ -24,5 +27,3 @@ cp requirements.txt .heroku/python/requirements-declared.txt
 
 [ ! "$FRESH_PYTHON" ] && bpwatch stop pip_install
 [ "$FRESH_PYTHON" ] && bpwatch stop pip_install_first
-
-echo
