@@ -13,6 +13,9 @@ if [[ -f requirements-uninstall.txt ]]; then
   pip uninstall -y -r requirements-uninstall.txt
 fi
 
+# change variables in all requirements files
+sed -i "s/\$APP/$APP/" requirements*
+ 
 /app/.heroku/python/bin/pip install -r requirements.txt --exists-action=w --src=./.heroku/src --allow-all-external  | cleanup | indent
 
 # Smart Requirements handling
