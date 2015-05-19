@@ -1,3 +1,8 @@
+Custom version of the buildpack for heroku
+
+1. Specify $APP variable in requirements.txt files.
+2. Always process requirements-uninstall.txt before pip install -r requirements.txt
+
 Heroku buildpack: Python
 ========================
 
