@@ -14,6 +14,12 @@ sed -i "s/\$APP/$APP/" requirements*
  
 /app/.heroku/python/bin/pip install -r requirements.txt --exists-action=w --src=./.heroku/src --allow-all-external  | cleanup | indent
 
+if [ -f requirements.$APP ]; then
+  echo "installing requirements for $APP"
+  /app/.heroku/python/bin/pip install -r requirements.$APP --exists-action=w --src=./.heroku/src --allow-all-external  | cleanup | indent
+fi
+
+
 # Smart Requirements handling
 cp requirements.txt .heroku/python/requirements-declared.txt
 /app/.heroku/python/bin/pip freeze > .heroku/python/requirements-installed.txt
