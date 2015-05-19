@@ -3,6 +3,9 @@ set +e
 bpwatch start pip_uninstall
 if [[ -f .heroku/python/requirements-declared.txt ]]; then
 
+  # change variables in all requirements files
+  sed -i "s/\$APP/$APP/" requirements*
+
   cp .heroku/python/requirements-declared.txt requirements-declared.txt
 
   pip-diff --stale requirements-declared.txt requirements.txt --exclude setuptools pip > .heroku/python/requirements-stale.txt
