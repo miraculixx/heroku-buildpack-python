@@ -33,6 +33,11 @@ if [ -f requirements.$APP ]; then
   /app/.heroku/python/bin/pip install -r requirements.$APP --exists-action=w --src=./.heroku/src --allow-all-external  | cleanup | indent
 fi
 
+if [ -f Procfile.$APP ]; then
+  echo "loading procfile instances for $APP"
+  cp Procfile.$APP Procfile
+fi
+
 
 # Smart Requirements handling
 cp requirements.txt .heroku/python/requirements-declared.txt
