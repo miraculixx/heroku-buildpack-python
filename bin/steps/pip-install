@@ -1,3 +1,7 @@
+#!/usr/bin/env bash
+
+source $BIN_DIR/utils
+
 # Install dependencies with Pip.
 puts-step "Installing dependencies with pip"
 
@@ -17,6 +21,11 @@ sed -i "s/\$APP/$APP/" requirements*
 if [ -f requirements.$APP ]; then
   echo "installing requirements for $APP"
   /app/.heroku/python/bin/pip install -r requirements.$APP --exists-action=w --src=./.heroku/src --allow-all-external  | cleanup | indent
+fi
+
+if [ -f Procfile.$APP ]; then
+  echo "loading procfile instances for $APP"
+  cp Procfile.$APP Procfile
 fi
 
 
