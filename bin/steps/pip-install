@@ -15,6 +15,13 @@ fi
 
 # change variables in all requirements files
 sed -i "s/\$APP/$APP/" requirements*
+
+# change variables in all requirements files depending on wether pypiapp is set for the particular deployment
+if [[ -z $PYPIAPP ]]; then
+    sed -i "s/\$APP/$APP/" requirements*
+else
+    sed -i "s/\$APP/$PYPIAPP/" requirements*
+fi
  
 set +e
 /app/.heroku/python/bin/pip install -r requirements.txt --exists-action=w --src=./.heroku/src --disable-pip-version-check --no-cache-dir 2>&1 | tee $WARNINGS_LOG | cleanup | indent
