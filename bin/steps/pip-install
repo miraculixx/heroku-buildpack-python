@@ -13,8 +13,13 @@ if [[ -f requirements-uninstall.txt ]]; then
   pip uninstall -y -r requirements-uninstall.txt
 fi
 
-# change variables in all requirements files
-sed -i "s/\$APP/$APP/" requirements*
+# change variables in all requirements files depending on wether pypiapp is set for the particular deployment
+
+if [[ -z $PYPIAPP ]]; then
+    sed -i "s/\$APP/$APP/" requirements*
+else
+    sed -i "s/\$APP/$PYPIAPP/" requirements*
+fi
  
 /app/.heroku/python/bin/pip install -r requirements.txt --exists-action=w --src=./.heroku/src --allow-all-external  | cleanup | indent
 
