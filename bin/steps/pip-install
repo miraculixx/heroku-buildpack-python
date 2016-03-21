@@ -4,6 +4,14 @@
 source $BIN_DIR/utils
 source $BIN_DIR/warnings
 
+# if user wants to uninstall some packages first do so
+set +e
+if [ -f requirements-uninstall.txt ]; then
+  puts-step "Uninstalling packages mentioned in requirements-uninstall.txt"
+  /app/.heroku/python/bin/pip uninstall -y -r requirements-uninstall.txt --disable-pip-version-check
+  PIP_STATUS="${PIPESTATUS[0]}"
+fi
+
 # change variables in all requirements files depending on wether pypiapp is set for the particular deployment
 if [[ -z $PYPIAPP ]]; then
     sed -i "s/\$APP/$APP/" requirements*
