@@ -1,18 +1,55 @@
-#!/usr/bin/env bash
-
-source $BIN_DIR/utils
-
-# Install dependencies with Pip.
-puts-step "Installing dependencies with pip"
-
 [ ! "$FRESH_PYTHON" ] && bpwatch start pip_install
 [ "$FRESH_PYTHON" ] && bpwatch start pip_install_first
 
-/app/.heroku/python/bin/pip install -r requirements.txt --exists-action=w --src=./.heroku/src --allow-all-external  | cleanup | indent
+# if user wants to uninstall some packages first do so
+set +e
+if [[ -f requirements-uninstall.txt ]]; then
+  puts-cmd "pip uninstall -y -r requirements-uninstall.txt"
+  /app/.heroku/python/bin/pip uninstall -y -r requirements-uninstall.txt --disable-pip-version-check
+  PIP_STATUS="${PIPESTATUS[0]}"
+fi
+
+# change variables in all requirements files depending on wether pypiapp is set for the particular deployment
+if [[ -z $PYPIAPP ]]; then
+    sed -i "s/\$APP/$APP/" requirements*
+else
+    sed -i "s/\$APP/$PYPIAPP/" requirements*
+fi
+
+if [ -f requirements.local.$APP ]; then
+  # uninstall packages before installing them 
+  puts-step "Uninstalling pre-installed shrebo libraries from requirements.local.$APP"
+  /app/.heroku/python/bin/pip uninstall -y -r requirements.local.$APP --disable-pip-version-check
+  puts-step "Installing shrebo packages for $APP from requirements.local.$APP"
+  /app/.heroku/python/bin/pip install -r requirements.local.$APP --exists-action=w --src=./.heroku/src --disable-pip-version-check --no-cache-dir 2>&1 | tee $WARNINGS_LOG | cleanup | indent
+  PIP_STATUS="${PIPESTATUS[0]}"
+elif [ -f requirements.local ]; then
+  puts-step "Uninstalling pre-installed shrebo libraries from requirements.local"
+  /app/.heroku/python/bin/pip uninstall -y -r requirements.local --disable-pip-version-check
+  puts-step "Installing shrebo packages for $APP from requirements.local"
+  /app/.heroku/python/bin/pip install -r requirements.local --exists-action=w --src=./.heroku/src --disable-pip-version-check --no-cache-dir 2>&1 | tee $WARNINGS_LOG | cleanup | indent
+  PIP_STATUS="${PIPESTATUS[0]}"
+fi
+
+puts-step "Installing standard packages for $APP"
+/app/.heroku/python/bin/pip install -r requirements.txt --exists-action=w --src=./.heroku/src --disable-pip-version-check --no-cache-dir 2>&1 | tee $WARNINGS_LOG | cleanup | indent
+PIP_STATUS="${PIPESTATUS[0]}"
+set -e
+
+show-warnings
+
+if [[ ! $PIP_STATUS -eq 0 ]]; then
+    exit 1
+fi
+
+if [ -f Procfile.$APP ]; then
+  puts-step "Loading procfile instances for $APP"
+  cp Procfile.$APP Procfile
+fi
 
 # Smart Requirements handling
 cp requirements.txt .heroku/python/requirements-declared.txt
-/app/.heroku/python/bin/pip freeze > .heroku/python/requirements-installed.txt
+/app/.heroku/python/bin/pip freeze --disable-pip-version-check > .heroku/python/requirements-installed.txt
 
 [ ! "$FRESH_PYTHON" ] && bpwatch stop pip_install
 [ "$FRESH_PYTHON" ] && bpwatch stop pip_install_first
