@@ -205,7 +205,7 @@ source $BIN_DIR/steps/cryptography
 source $BIN_DIR/steps/gdal
 
 # Install dependencies with Pip.
-source $BIN_DIR/steps/pip-install
+sub-env $BIN_DIR/steps/pip-install
 
 # Experimental post_compile hook.
 bpwatch start post_compile
