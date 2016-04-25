@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 
+# source libraries into sub env
 source $BIN_DIR/utils
+source $BIN_DIR/warnings
 
 # change variables in all requirements files depending on wether pypiapp is set for the particular deployment
 if [[ -z $PYPIAPP ]]; then
