@@ -3,6 +3,16 @@
 # source libraries into sub env
 source $BIN_DIR/utils
 source $BIN_DIR/warnings
+[ ! "$FRESH_PYTHON" ] && bpwatch start pip_install
+[ "$FRESH_PYTHON" ] && bpwatch start pip_install_first
+
+# if user wants to uninstall some packages first do so
+set +e
+if [ -f requirements-uninstall.txt ]; then
+  puts-step "Uninstalling packages mentioned in requirements-uninstall.txt"
+  /app/.heroku/python/bin/pip uninstall -y -r requirements-uninstall.txt --disable-pip-version-check
+  PIP_STATUS="${PIPESTATUS[0]}"
+fi
 
 # if user wants to uninstall some packages first do so
 set +e
