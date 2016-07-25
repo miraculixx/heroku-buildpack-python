@@ -24,18 +24,18 @@ if [ -f requirements.local.$APP ]; then
   puts-step "Uninstalling pre-installed shrebo libraries from requirements.local.$APP"
   /app/.heroku/python/bin/pip uninstall -y -r requirements.local.$APP --disable-pip-version-check
   puts-step "Installing shrebo packages for $APP from requirements.local.$APP"
-  /app/.heroku/python/bin/pip install -r requirements.local.$APP --exists-action=w --src=./.heroku/src --disable-pip-version-check --no-cache-dir 2>&1 | tee $WARNINGS_LOG | cleanup | indent
+  /app/.heroku/python/bin/pip install --process-dependency-links -r requirements.local.$APP --exists-action=w --src=./.heroku/src --disable-pip-version-check --no-cache-dir 2>&1 | tee $WARNINGS_LOG | cleanup | indent
   PIP_STATUS="${PIPESTATUS[0]}"
 elif [ -f requirements.local ]; then
   puts-step "Uninstalling pre-installed shrebo libraries from requirements.local"
   /app/.heroku/python/bin/pip uninstall -y -r requirements.local --disable-pip-version-check
   puts-step "Installing shrebo packages for $APP from requirements.local"
-  /app/.heroku/python/bin/pip install -r requirements.local --exists-action=w --src=./.heroku/src --disable-pip-version-check --no-cache-dir 2>&1 | tee $WARNINGS_LOG | cleanup | indent
+  /app/.heroku/python/bin/pip install --process-dependency-links -r requirements.local --exists-action=w --src=./.heroku/src --disable-pip-version-check --no-cache-dir 2>&1 | tee $WARNINGS_LOG | cleanup | indent
   PIP_STATUS="${PIPESTATUS[0]}"
 fi
 
 puts-step "Installing standard packages for $APP"
-/app/.heroku/python/bin/pip install -r requirements.txt --exists-action=w --src=./.heroku/src --disable-pip-version-check --no-cache-dir 2>&1 | tee $WARNINGS_LOG | cleanup | indent
+/app/.heroku/python/bin/pip install --process-dependency-links -r requirements.txt --exists-action=w --src=./.heroku/src --disable-pip-version-check --no-cache-dir 2>&1 | tee $WARNINGS_LOG | cleanup | indent
 PIP_STATUS="${PIPESTATUS[0]}"
 set -e
 
