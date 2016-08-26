@@ -29,24 +29,25 @@ else
     sed -i "s/\$APP/$PYPIAPP/" requirements*
 fi
 
-if [ -f requirements.local.$APP ]; then
-  # uninstall packages before installing them 
-  puts-step "Uninstalling pre-installed shrebo libraries from requirements.local.$APP"
-  /app/.heroku/python/bin/pip uninstall -y -r requirements.local.$APP --disable-pip-version-check
-  puts-step "Installing shrebo packages for $APP from requirements.local.$APP"
-  /app/.heroku/python/bin/pip install --process-dependency-links -r requirements.local.$APP --allow-external --exists-action=w --src=./.heroku/src --disable-pip-version-check --no-cache-dir 2>&1 | tee $WARNINGS_LOG | cleanup | indent
-  PIP_STATUS="${PIPESTATUS[0]}"
-elif [ -f requirements.local ]; then
-  puts-step "Uninstalling pre-installed shrebo libraries from requirements.local"
-  /app/.heroku/python/bin/pip uninstall -y -r requirements.local --disable-pip-version-check
-  puts-step "Installing shrebo packages for $APP from requirements.local"
-  /app/.heroku/python/bin/pip install --process-dependency-links -r requirements.local --allow-external --exists-action=w --src=./.heroku/src --disable-pip-version-check --no-cache-dir 2>&1 | tee $WARNINGS_LOG | cleanup | indent
-  PIP_STATUS="${PIPESTATUS[0]}"
-fi
-
 puts-step "Installing standard packages for $APP"
 /app/.heroku/python/bin/pip install --process-dependency-links -r requirements.txt --exists-action=w --src=./.heroku/src --disable-pip-version-check --no-cache-dir 2>&1 | tee $WARNINGS_LOG | cleanup | indent
 PIP_STATUS="${PIPESTATUS[0]}"
+
+# install $APP-local requirements.
+function install_local() {
+  # uninstall packages before installing them 
+  puts-step "Uninstalling pre-installed shrebo libraries from $1"
+  /app/.heroku/python/bin/pip uninstall -y -r $1 --disable-pip-version-check
+  puts-step "Installing shrebo packages for $APP from $"
+  /app/.heroku/python/bin/pip install --process-dependency-links -r $1 --allow-external --exists-action=w --src=./.heroku/src --disable-pip-version-check --no-cache-dir 2>&1 | tee $WARNINGS_LOG | cleanup | indent
+  PIP_STATUS="${PIPESTATUS[0]}"
+}
+
+if [ -f requirements.local.$APP ]; then
+  install_local requirements.local.$APP
+elif [ -f requirements.local ]; then
+  install_local requirements.local
+fi
 set -e
 
 show-warnings
